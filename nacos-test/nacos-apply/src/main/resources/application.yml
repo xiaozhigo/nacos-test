@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    active: @spring.profiles.active@
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  sleuth:
+    enabled: 'on'
+springfox:
+  documentation:
+    swagger-ui:
+      enabled: true # false关闭swagger-ui界面 但不关闭openapi

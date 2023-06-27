@@ -1,0 +1,120 @@
+spring:
+  application:
+    name: nacos-gateway
+    description: 网关服务
+  cloud:
+    nacos:
+      discovery:
+        server-addr: @nacos.address@
+        #指定命名空间 可以用于区分环境 只有同一环境下服务才可以调用
+        namespace: @nacos.namespace@
+        #指定集群名称
+        cluster-name: ShangHai
+        username: @nacos.name@
+        password: @nacos.password@
+    gateway:
+      discovery:
+        locator:
+          lower-case-service-id: true
+      routes:
+        - id: nacos-gateway
+          uri: lb://nacos-gateway
+          #order: -1
+          predicates:
+            - Path=/nacos-gateway/**
+          filters:
+            - RewritePath=/nacos-gateway(?<segment>/?.*), $\{segment}
+            - Swagger
+            - name: GatewayRequestRateLimiter
+              args:
+                # 令牌桶每秒填充平均速率
+                redis-rate-limiter.replenishRate: 1000
+                # 令牌桶的上限
+                redis-rate-limiter.burstCapacity: 5000
+                # 使用SpEL表达式从Spring容器中获取Bean对象
+                key-resolver: "#{@pathKeyResolver}"
+    sentinel:
+      filter:
+        #关闭spring mvc端点的保护
+        enabled: true
+      transport:
+        # 配置Sentinel dashboard地址
+        dashboard: 10.134.1.111:8701,10.134.1.111:8702,10.134.1.112:8703
+        # 默认8719端口，键入被占用会自动从8719+1，直到找到未被占用的端口
+        port: 8719
+      datasource:
+        # 名称随意
+        flow:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-flow-rules
+            groupId: SENTINEL_GROUP
+            namespace:  ${spring.cloud.nacos.discovery.namespace}
+            rule-type: flow  # 规则类型，取值见：org.springframework.cloud.alibaba.sentinel.datasource.RuleType
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+        degrade:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-degrade-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: degrade
+        system:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-system-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: system
+        authority:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-authority-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: authority
+        param-flow:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-param-flow-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: param-flow
+  redis:
+    password: 123456
+    timeout: 5000 # 连接超时时长（毫秒）
+    database: 0
+    sentinel:
+      master: mymaster
+      nodes:
+        - 10.134.1.27:26379
+        - 10.134.1.27:26479
+        - 10.134.1.27:26579
+    lettuce:
+      pool:
+        max-active: -1 # 连接池最大连接数（使用负值表示没有限制）
+        max-wait: 2000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-idle: 100 # 连接池中的最大空闲连接
+        min-idle: 10  # 连接池中的最小空闲连接
+server:
+  port: 8020
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+logging:
+  level:
+    com.hehe.nacosgateway: debug

@@ -1,0 +1,5 @@
+# Auto Configuration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.hehe.nacoscommon.redis.RedisProperties,\
+com.hehe.nacoscommon.redis.RedissionConfig,\
+com.hehe.nacoscommon.properties.PubGlobalProperties

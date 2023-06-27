@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: nacos-xxljob
+  profiles:
+    active: @spring.profiles.active@
+  cloud:
+    nacos:
+      config:
+        server-addr: @nacos.address@
+        namespace: @nacos.namespace@
+        file-extension: yaml
+        username: @nacos.name@
+        password: @nacos.password@
+        shared-configs:
+          - data-id: hyf-cloud-common.yaml
+            refresh: true
+jasypt:
+  encryptor:
+    password: @jasypt.password@
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    iv-generator-classname: org.jasypt.iv.RandomIvGenerator
+    salt-generator-classname: org.jasypt.salt.RandomSaltGenerator
+    string-output-type: base64
+    provider-name: SunJCE
+    pool-size: 1
+    key-obtention-iterations: 1000

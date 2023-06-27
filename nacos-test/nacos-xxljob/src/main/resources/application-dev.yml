@@ -1,0 +1,196 @@
+spring:
+  application:
+    name: nacos-xxljob
+    description: 定时任务模块(仅用于定时任务)
+  datasource:
+    orderdb:
+      jdbc-url: jdbc:mysql://10.12.5.34:3306/saleorderdb?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC
+      username: admin
+      password: admin12345
+      driver-class-name: com.mysql.jdbc.Driver
+    funddatadb:
+      jdbc-url: jdbc:mysql://10.12.5.34:3306/salefunddata?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC
+      username: admin
+      password: admin12345
+      driver-class-name: com.mysql.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        server-addr:  @nacos.address@
+        #指定命名空间 可以用于区分环境 只有同一环境下服务才可以调用
+        namespace: @nacos.namespace@
+        #指定集群名称
+        cluster-name: ShangHai
+        username: @nacos.name@
+        password: @nacos.password@
+    sentinel:
+      filter:
+        #关闭spring mvc端点的保护
+        enabled: true
+      transport:
+        # 配置Sentinel dashboard地址
+        dashboard: 10.134.1.111:8701,10.134.1.111:8702,10.134.1.112:8703
+        # 默认8719端口，键入被占用会自动从8719+1，直到找到未被占用的端口
+        port: 8719
+      datasource:
+        # 名称随意
+        flow:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-flow-rules
+            groupId: SENTINEL_GROUP
+            namespace:  ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: flow  # 规则类型，取值见：org.springframework.cloud.alibaba.sentinel.datasource.RuleType
+        degrade:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-degrade-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: degrade
+        system:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-system-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: system
+        authority:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-authority-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: authority
+        param-flow:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-param-flow-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: param-flow
+  redis:
+    password: 123456
+    timeout: 5000 # 连接超时时长（毫秒）
+    database: 0
+    sentinel:
+      master: mymaster
+      nodes:
+        - 10.134.1.27:26379
+        - 10.134.1.27:26479
+        - 10.134.1.27:26579
+    lettuce:
+      pool:
+        max-active: -1 # 连接池最大连接数（使用负值表示没有限制）
+        max-wait: 2000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-idle: 100 # 连接池中的最大空闲连接
+        min-idle: 10  # 连接池中的最小空闲连接
+  kafka:
+    #kafkaListener Producer 发送端
+    producer:
+      #地址
+      bootstrap-servers: 10.134.1.24:9092,10.134.1.25:9092
+      #发送端 id
+      client-id: producerPublic
+      #发送端确认模式
+      acks: -1
+      #发送失败重试次数
+      retries: 2
+      #批处理条数,当多个记录被发送至统一分区时，producer对于同一个分区来说，会按照 batch.size 的大小进行统一收集，批量发送
+      batch-size: 16384
+      # 33554432 即32MB的批处理缓冲区
+      buffer-memory: 33554432
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    #kafkaListener Consumer 消费端
+    consumer:
+      #地址
+      bootstrap-servers: ${spring.kafka.producer.bootstrap-servers}
+      #消费者 group.id 组ID
+      group-id: default-group
+      #自动提交
+      enable-auto-commit: false
+      ##新的groupid,是否从头开始消费
+      auto-offset-reset: earliest
+      max-poll-records: 500
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        # 消费会话超时时间(超过这个时间consumer没有发送心跳,就会触发rebalance操作)
+        session:
+          timeout:
+            ms: 120000
+        #决定了获取消息后提交偏移量的最大时间，超过设定的时间（默认5分钟），服务端也会认为该消费者失效。
+        max:
+          poll:
+            interval:
+              ms: 600000
+    template:
+      #m默认topic
+      default-topic: defaultTopic
+    listener:
+      #消费数量
+      concurrency: 3
+      #手动确认
+      ack-mode: manual
+      poll-timeout: 3000
+#配置feign的日志级别
+feign:
+  client:
+    config:
+      #想要调用的微服务名称
+      #user-center:
+      #全局配置
+      default:
+        logger-level: full
+        connect-timeout: 2000
+        read-timeout: 5000
+  httpclient:
+    #让feign使用 apache的httpclient做请求而不是使用默认的urlcontion...
+    enabled: true
+    #feign的最大连接数
+    max-connections: 200
+    #feign的单个路径最大连接数
+    max-connections-per-route: 50
+  sentinel:
+    #为feign整合sentinel
+    enabled: true
+server:
+  port: 8024
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+xxl:
+  job:
+    # 执行器通讯TOKEN，非空时启用
+    accessToken:
+    admin:
+      # 调度中心部署跟地址：如调度中心集群部署存在多个地址则用逗号分隔。执行器将会使用该地址进行"执行器心跳注册"和"任务结果回调"
+      addresses: http://10.134.0.135/xxl-job-admin
+    executor:
+      # 执行器"AppName"和地址信息配置：AppName执行器心跳注册分组依据；地址信息用于"调度中心请求并触发任务"和"执行器注册"。执行器默认端口为9999，执行器IP默认为空表示自动获取IP，多网卡时可手动设置指定IP，该IP不会绑定Host仅作为通讯实用。单机部署多个执行器时，注意要配置不同执行器端口
+      appname: xxl-job-executor-hy-cloud-bd
+      ip:
+      # 执行器运行日志文件存储的磁盘位置，需要对该路径拥有读写权限
+      logpath: /data/applogs/xxl-job/jobhandler
+      # 执行器日志保存天数 [选填] ：值大于3时生效，启用执行器Log文件定期清理功能，否则不生效
+      logretentiondays: 3
+      port: 9991
+logging:
+  level:
+    com.hehe.nacosxxljob: debug

@@ -1,0 +1,23 @@
+sentinelServersConfig:
+  idleConnectionTimeout: 10000 #连接空闲超时(毫秒)，默认10000
+  connectTimeout: 10000 #连接空闲超时(毫秒)，默认10000
+  timeout: 10000 #命令等待超时(毫秒)，默认3000
+  retryAttempts: 3 #命令失败重试次数
+  retryInterval: 1500 #命令重试发送时间间隔(毫秒)，默认1500
+  password: null
+  subscriptionsPerConnection: 5 #单个连接最大订阅数量，默认5
+  clientName: null #客户端名称
+  loadBalancer: !<org.redisson.connection.balancer.RoundRobinLoadBalancer> { }
+  #slaveSubscriptionConnectionMinimumIdleSize: 1 #发布和订阅连接的最小空闲连接数，默认1
+  #slaveSubscriptionConnectionPoolSize: 50 #发布和订阅连接池大小，默认50
+  slaveConnectionMinimumIdleSize: 32 #最小空闲连接数，默认32
+  slaveConnectionPoolSize: 64 #连接池大小，默认64
+  masterConnectionMinimumIdleSize: 1
+  masterConnectionPoolSize: 64
+  readMode: "SLAVE"
+  database: 0
+  #dnsMonitoringInterval: 5000 #DNS监测时间间隔(毫秒)，默认5000
+threads: 16
+nettyThreads: 32
+codec: !<org.redisson.codec.JsonJacksonCodec> {}
+#"transportMode": "NIO"

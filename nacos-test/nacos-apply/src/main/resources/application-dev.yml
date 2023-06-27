@@ -1,0 +1,208 @@
+spring:
+  application:
+    name: nacos-apply
+    description: 应用板块
+  datasource:
+    orderdb:
+      jdbc-url: jdbc:mysql://10.12.5.34:3306/saleorderdb?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC
+      username: admin
+      password: admin12345
+      driver-class-name: com.mysql.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        server-addr:  @nacos.address@
+        #指定命名空间 可以用于区分环境 只有同一环境下服务才可以调用
+        namespace: @nacos.namespace@
+        #指定集群名称
+        cluster-name: ShangHai
+        username: @nacos.name@
+        password: @nacos.password@
+    sentinel:
+      filter:
+        #关闭spring mvc端点的保护
+        enabled: true
+      transport:
+        # 配置Sentinel dashboard地址
+        dashboard: 10.134.1.111:8701,10.134.1.111:8702,10.134.1.112:8703
+        # 默认8719端口，键入被占用会自动从8719+1，直到找到未被占用的端口
+        port: 8719
+      datasource:
+        # 名称随意
+        flow:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-flow-rules
+            groupId: SENTINEL_GROUP
+            namespace:  ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: flow  # 规则类型，取值见：org.springframework.cloud.alibaba.sentinel.datasource.RuleType
+        degrade:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-degrade-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: degrade
+        system:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-system-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: system
+        authority:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-authority-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: authority
+        param-flow:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-param-flow-rules
+            groupId: SENTINEL_GROUP
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+            rule-type: param-flow
+  redis:
+    password: 123456
+    timeout: 5000 # 连接超时时长（毫秒）
+    database: 0
+    sentinel:
+      master: mymaster
+      nodes:
+        - 10.134.1.27:26379
+        - 10.134.1.27:26479
+        - 10.134.1.27:26579
+    lettuce:
+      pool:
+        max-active: -1 # 连接池最大连接数（使用负值表示没有限制）
+        max-wait: 2000 # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-idle: 100 # 连接池中的最大空闲连接
+        min-idle: 10  # 连接池中的最小空闲连接
+  kafka:
+    #kafkaListener Producer 发送端
+    producer:
+      #地址
+      bootstrap-servers: 10.134.1.24:9092,10.134.1.25:9092
+      #发送端 id
+      client-id: producerPublic
+      #发送端确认模式
+      acks: -1
+      #发送失败重试次数
+      retries: 2
+      #批处理条数,当多个记录被发送至统一分区时，producer对于同一个分区来说，会按照 batch.size 的大小进行统一收集，批量发送
+      batch-size: 16384
+      # 33554432 即32MB的批处理缓冲区
+      buffer-memory: 33554432
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    #kafkaListener Consumer 消费端
+    consumer:
+      #地址
+      bootstrap-servers: ${spring.kafka.producer.bootstrap-servers}
+      #消费者 group.id 组ID
+      group-id: default-group
+      #自动提交
+      enable-auto-commit: false
+      ##新的groupid,是否从头开始消费
+      auto-offset-reset: earliest
+      max-poll-records: 500
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        # 消费会话超时时间(超过这个时间consumer没有发送心跳,就会触发rebalance操作)
+        session:
+          timeout:
+            ms: 120000
+        #决定了获取消息后提交偏移量的最大时间，超过设定的时间（默认5分钟），服务端也会认为该消费者失效。
+        max:
+          poll:
+            interval:
+              ms: 600000
+    template:
+      #m默认topic
+      default-topic: defaultTopic
+    listener:
+      #消费数量
+      concurrency: 3
+      #手动确认
+      ack-mode: manual
+      poll-timeout: 3000
+  servlet:
+    multipart:
+      #单个文件最大大小
+      max-file-size: 10MB
+      #所有上传文件最大大小
+      max-request-size: 100MB
+feign:
+  client:
+    config:
+      #想要调用的微服务名称
+      #user-center:
+      #全局配置
+      default:
+        logger-level: full
+        connect-timeout: 2000
+        read-timeout: 5000
+  httpclient:
+    #让feign使用 apache的httpclient做请求而不是使用默认的urlcontion...
+    enabled: true
+    #feign的最大连接数
+    max-connections: 200
+    #feign的单个路径最大连接数
+    max-connections-per-route: 50
+  sentinel:
+    #为feign整合sentinel
+    enabled: true
+server:
+  port: 8022
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+#seata配置
+seata:
+  enabled: true
+  enable-auto-data-source-proxy: true
+  application-id: ${spring.application.name}
+  # Seata 事务组编号，此处需于 seata 相同
+  tx-service-group: default-tx-group
+  data-source-proxy-mode: AT
+  config:
+    type: nacos
+    nacos:
+      # nacos ip地址
+      server-addr: ${spring.cloud.nacos.discovery.server-addr}
+      group: DEFAULT_GROUP
+      data-id: seata-server.properties # 读取 nacos seata 配置
+      namespace: 427f28f2-baa4-4b6a-bcc6-967b2c2aad86
+      username: nacos-seata
+      password: ENC(NqP5WKBdBF1tZtJ/CCB/q1G549fEuUOzu1XQChjVB+zpQkvTU/1IUzSNlO6CMrx4)
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server # seata 服务名
+      # nacos ip地址
+      server-addr: ${spring.cloud.nacos.discovery.server-addr}
+      group: DEFAULT_GROUP
+      namespace: ${seata.config.nacos.namespace}
+      username: ${seata.config.nacos.username}
+      password: ${seata.config.nacos.password}
+logging:
+  level:
+    com.hehe.nacosapply: debug

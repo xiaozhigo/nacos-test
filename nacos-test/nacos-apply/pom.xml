@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.hehe</groupId>
+        <artifactId>nacos-test</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>nacos-apply</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>nacos-apply</name>
+    <description>Nacos应用</description>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <io.seata.version>1.6.1</io.seata.version>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <spring.profiles.active>dev</spring.profiles.active>
+                <nacos.namespace>28e1abc8-607f-4c8f-9e5b-869a840028cc</nacos.namespace>
+                <nacos.address>10.134.1.111:8840,10.134.1.112:8845,10.134.1.112:8848</nacos.address>
+                <nacos.name>hyf-test</nacos.name>
+                <nacos.password>ENC(S++J5ycfo21D8gICb/PiLZ3oRJ4zx4JFJqSIYdTqKJPzis0qt2dGB9znpV9raWw5)</nacos.password>
+                <jasypt.password>mNo1eZDhGYAKxR0z5ROVqpsB</jasypt.password>
+            </properties>
+            <!--<activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>-->
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <spring.profiles.active>test</spring.profiles.active>
+                <nacos.namespace>75f1cb02-6858-405d-87d3-1c3d112bd5aa</nacos.namespace>
+                <nacos.address>10.134.1.111:8840,10.134.1.112:8845,10.134.1.112:8848</nacos.address>
+                <nacos.name>hyf-test</nacos.name>
+                <nacos.password>ENC(S++J5ycfo21D8gICb/PiLZ3oRJ4zx4JFJqSIYdTqKJPzis0qt2dGB9znpV9raWw5)</nacos.password>
+                <jasypt.password>mNo1eZDhGYAKxR0z5ROVqpsB</jasypt.password>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <spring.profiles.active>prod</spring.profiles.active>
+                <nacos.namespace>781050f3-9dea-4c07-a16b-086df05cdf82</nacos.namespace>
+                <nacos.address>ENC(9iczlugZo+Y+v1gDbboNYrEvfIsQaX5E8MPKnILrJdjdMjwKqHonJatYQrDEzPWT9+u6SW5JGdOO66n3OD6Ow7nHJ+Sv3zjHP5v2NNizvweuTjbP71O1SYPvxG80NRLS)</nacos.address>
+                <nacos.name>hyf-pub</nacos.name>
+                <nacos.password>ENC(/mb7Fs8I8baaC0lQyh8YdI8f1TDKSYRcbWiIyNDbDEkoTaO/FanX2XxdZaS0+a7s)</nacos.password>
+                <jasypt.password>自动生成</jasypt.password>
+            </properties>
+
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.hehe</groupId>
+            <artifactId>nacos-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--seata-->
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-spring-boot-starter</artifactId>
+            <version>${io.seata.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>druid</artifactId>
+                    <groupId>com.alibaba</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+            <version>${cloud-alibaba.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.seata</groupId>
+                    <artifactId>seata-spring-boot-starter</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.connector.java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis.plus.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>nacos-apply</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <!--开启过滤，用指定的参数替换directory下的文件中的参数-->
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+
+</project>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hehe.nacosxxljob.mapper.funddata.Test2Mapper">
+
+    <resultMap id="BaseResultMap" type="com.hehe.nacosxxljob.dto.funddatadb.Test2" >
+        <result column="id" property="id" />
+        <result column="name" property="name" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id,
+        name
+    </sql>
+
+
+    <select id="loadTest2" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM test2
+        WHERE id = #{id}
+    </select>
+
+</mapper>
